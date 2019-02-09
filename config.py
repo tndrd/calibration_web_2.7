@@ -1,0 +1,3 @@
+PORT = 8081
+DEBUG = True
+SAVING_PATH = ""

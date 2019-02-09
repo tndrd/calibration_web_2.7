@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <title>Calibration</title>
+</head>
+<body>
+<div class="container">
+<form class="init-form" action="" method="post" role="form" novalidate>
+    <h2 class="heading1">Camera calibration service</h2>
+    <h3 class="init-form-heading">Chessboard parameters</h3>
+    {{ form.hidden_tag() }}
+    <p>
+            {{ form.width_field (size=38, class_=field, type="width", placeholder="Chessboard width") }}
+        </p>
+        <p>
+            {{ form.height_field (size=38, class_=field,type="height",  placeholder="Chessboard height") }}
+        </p>
+        <p>
+            {{ form.size_field (size=38, class_=field, type="size", placeholder="Square side length") }}
+        </p>
+        <p>{{ form.submit(class="btn btn-lg btn-primary btn-block") }}</p>
+    </form>
+</div>
+</body>
+</html>
