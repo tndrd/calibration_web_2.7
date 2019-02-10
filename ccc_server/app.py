@@ -56,7 +56,7 @@ def finish():
     if cam_calib.finish:
         return redirect("/")
     else:
-        return calibrate_page("Not enough photos")
+        return calibrate_page("not_enough")
 
 
 @app.route("/preview")

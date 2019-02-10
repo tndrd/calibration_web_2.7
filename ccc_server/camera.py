@@ -47,8 +47,9 @@ class CalibrationCamera(object):
         height, width, depth = img.shape
         coef_x = 640 / width
         coef_y = 480 / height
+        self.corners = cv2.cornerSubPix(self.processing_image, self.corners, (11, 11), (-1, -1), self.criteria)
         cv2.drawChessboardCorners(img, (self.width, self.length), self.corners, ret)
-        img = cv2.resize(img, (0, 0), fx=(coef_x), fy=(coef_y))
+        img = cv2.resize(img, (0, 0), fx=coef_x, fy=coef_y)
         ret, jpg = cv2.imencode('.jpg', img)
         return jpg.tobytes(), True
 
@@ -64,8 +65,7 @@ class CalibrationCamera(object):
 
     def add_pic(self):
         self.objpoints.append(self.objp)
-        corners2 = cv2.cornerSubPix(self.processing_image, self.corners, (11, 11), (-1, -1), self.criteria)
-        self.imgpoints.append(corners2)
+        self.imgpoints.append(self.corners)
 
     @property
     def finish(self):
@@ -80,12 +80,12 @@ class CalibrationCamera(object):
 
     def amount_left(self):
         if len(self.objpoints) < 25:
-            return 25 - len(self.objpoints)-1
+            return 25 - len(self.objpoints) - 1
         else:
             return len(self.objpoints)
 
-    def __yaml_dump(self,mtx, dist, rvecs, tvecs, resolution):
-        h, w, = resolution
+    def __yaml_dump(self, mtx, dist, rvecs, tvecs, resolution):
+        h, w, = tuple(map(int,resolution))
         pmatrix = self.__compute_proj_mat(mtx, rvecs, tvecs)
         rm_data = [1, 0, 0, 0, 1, 0, 0, 0, 1]
         mat_data = []
@@ -108,14 +108,14 @@ class CalibrationCamera(object):
                 "distortion_coefficients": {"rows": 1, "cols": 8, "data": dst_data},
                 "rectification_matrix": {"rows": 3, "cols": 3, "data": rm_data},
                 "projection_matrix": {"rows": 3, "cols": 4, "data": pm_data}}
-        file = open(SAVING_PATH+"camera_info.yaml", "w")
+        file = open(SAVING_PATH+"camera_info_"+str(w)+"x"+str(h)+".yaml", "w")
         for key in data:
             if type(key) == dict:
                 for key2 in key: file.write(yaml.dump({key2: key[key2]}))
             else:
                 file.write(yaml.dump({key: data[key]}, default_flow_style=False))
 
-    def __compute_proj_mat(self,mtx, rvecs, tvecs):
+    def __compute_proj_mat(self, mtx, rvecs, tvecs):
         cam_mtx = np.zeros((3, 4), np.float64)
         cam_mtx[:, :-1] = mtx
         rmat = np.zeros((3, 3), np.float64)

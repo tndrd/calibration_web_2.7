@@ -7,14 +7,14 @@
 </head>
 <body>
 
-{% if info %}
 {% if info =="not_found" %}
 <div class="alert alert-warning"><strong>Chessboard not found.</strong></div>
 {% elif info =="added" %}
 <div class="alert alert-success"><strong>Photo added!</strong></div>
 {% elif info =="new" %}
 <div class="alert alert-info"><strong>Calibration started!</strong></div>
-{% endif %}
+{% elif info =="not_enough" %}
+<div class="alert alert-warning"><strong>Not enough pictures!</strong></div>
 {% endif %}
 <p><a href = "/check_page"><img src="http://192.168.11.1:8080/stream?topic=/main_camera/image_raw"></a></p>
 
