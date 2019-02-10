@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <title>Calibration</title>
+</head>
+<body>
+<div class="container">
+    <h1 class="heading1">Calibration successful!</h1>
+    <h2 class="heading2">The file was saved as <strong>{{name}}</strong></h2>
+    <h2 class="heading2">Re-projection error: <strong>{{error}}</strong></h2>
+</div>
+</body>
+</html>

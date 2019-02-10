@@ -53,8 +53,9 @@ def add():
 
 @app.route('/finish')
 def finish():
-    if cam_calib.finish:
-        return redirect("/")
+    ret, error, name = cam_calib.finish()
+    if ret:
+        return final_page(error, name)
     else:
         return calibrate_page("not_enough")
 
@@ -67,6 +68,13 @@ def preview():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+@app.route("/final")
+def final_page(error, name):
+    return render_template("final.html", error=error, name=name)
+
+
 if __name__ == '__main__':
-    if DEBUG: app.run(debug=True)
-    else: app.run(host="192.168.11.1", port=PORT)
+    if DEBUG:
+        app.run(debug=True)
+    else:
+        app.run(host="192.168.11.1", port=PORT)

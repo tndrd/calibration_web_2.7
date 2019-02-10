@@ -67,16 +67,15 @@ class CalibrationCamera(object):
         self.objpoints.append(self.objp)
         self.imgpoints.append(self.corners)
 
-    @property
     def finish(self):
         if len(self.objpoints) >= 25:
             ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(self.objpoints, self.imgpoints,
                                                                self.processing_image.shape[::-1], None,
                                                                None, None, None, cv2.CALIB_RATIONAL_MODEL)
-            self.__yaml_dump(mtx, dist, rvecs, tvecs, self.processing_image.shape)
-            return True
+            name = self.__yaml_dump(mtx, dist, rvecs, tvecs, self.processing_image.shape)
+            return True, self.reproj_error(rvecs, tvecs, mtx, dist), name
         else:
-            return False
+            return False, 0, ""
 
     def amount_left(self):
         if len(self.objpoints) < 25:
@@ -85,7 +84,7 @@ class CalibrationCamera(object):
             return len(self.objpoints)
 
     def __yaml_dump(self, mtx, dist, rvecs, tvecs, resolution):
-        h, w, = tuple(map(int,resolution))
+        h, w, = tuple(map(int, resolution))
         pmatrix = self.__compute_proj_mat(mtx, rvecs, tvecs)
         rm_data = [1, 0, 0, 0, 1, 0, 0, 0, 1]
         mat_data = []
@@ -108,12 +107,14 @@ class CalibrationCamera(object):
                 "distortion_coefficients": {"rows": 1, "cols": 8, "data": dst_data},
                 "rectification_matrix": {"rows": 3, "cols": 3, "data": rm_data},
                 "projection_matrix": {"rows": 3, "cols": 4, "data": pm_data}}
-        file = open(SAVING_PATH+"camera_info_"+str(w)+"x"+str(h)+".yaml", "w")
+        name = SAVING_PATH + "camera_info_" + str(w) + "x" + str(h) + ".yaml"
+        file = open(name, "w")
         for key in data:
             if type(key) == dict:
                 for key2 in key: file.write(yaml.dump({key2: key[key2]}))
             else:
                 file.write(yaml.dump({key: data[key]}, default_flow_style=False))
+        return name
 
     def __compute_proj_mat(self, mtx, rvecs, tvecs):
         cam_mtx = np.zeros((3, 4), np.float64)
@@ -123,3 +124,11 @@ class CalibrationCamera(object):
         cv2.Rodrigues(rvecs[0], rmat)
         r_t_mat = cv2.hconcat([rmat, tvecs[0]], r_t_mat)
         return (cam_mtx * r_t_mat)
+
+    def reproj_error(self, rvecs, tvecs, mtx, dist):
+        mean_error = 0
+        for i in xrange(len(self.objpoints)):
+            imgpoints2, _ = cv2.projectPoints(self.objpoints[i], rvecs[i], tvecs[i], mtx, dist)
+            error = cv2.norm(self.imgpoints[i], imgpoints2, cv2.NORM_L2) / len(imgpoints2)
+            mean_error += error
+        return float(mean_error / len(self.objpoints))
