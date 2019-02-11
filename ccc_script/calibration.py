@@ -1,9 +1,11 @@
+# coding=utf-8
 import numpy as np
 import cv2
 import glob
 import yaml
 import urllib2
 
+# Калибровочные параметры для стандартной камеры Клевера под разрешения 320х240 и 640х280 соотвтственно
 CLEVER_FISHEYE_CAM_320 = {
     "camera_matrix": {"data": [166.23942373, 0, 162.19011247, 0, 166.5880924, 109.82227736, 0, 0, 1]},
     "distortion_coefficients": {"data": [2.15356885e-01, -1.17472846e-01, -3.06197672e-04, -1.09444025e-04,
@@ -18,7 +20,8 @@ CLEVER_FISHEYE_CAM_640 = {"camera_matrix": {
                                          0.00000000e+00, 0.00000000e+00]}}
 
 
-def set_camera_info(chessboard_size, square_size, images):
+def set_camera_info(chessboard_size, square_size, path):  # Калибровка по существующим изображениям
+    # Проверка корректности введенных аргументов
     if chessboard_size is not None:
         if len(chessboard_size) == 2:
             length, width = chessboard_size
@@ -31,56 +34,63 @@ def set_camera_info(chessboard_size, square_size, images):
     if square_size is None:
         print("Incorrect square chessboard_size")
         quit()
+    # Инициализация некоторых переменных
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, square_size, 0.001)
     objp = np.zeros((length * width, 3), np.float32)
     objp[:, :2] = np.mgrid[0:length, 0:width].T.reshape(-1, 2)
-    objpoints = []
-    imgpoints = []
-    images = glob.glob(str(images) + '*.jpg')
-    if len(images) < 25:
+    objpoints = []  # Точки на мишени
+    imgpoints = []  # Точки на изображении
+    images = glob.glob(str(images) + '*.jpg')  # Получение изображений из директории
+    if len(images) < 25:  # Проверка количества полученных изображений
         print("Error: not enough images (25 required), found: ", len(images))
         quit()
     print("Starting calibration...")
     for fname in images:
-        img = cv2.imread(fname)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        ret, corners = cv2.findChessboardCorners(gray, (length, width), None)
-        if ret:
-            objpoints.append(objp)
-            corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-            imgpoints.append(corners2)
-    if objpoints == [] or imgpoints == []:
+        img = cv2.imread(fname)  # Получение изображения
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Переход в моно
+        ret, corners = cv2.findChessboardCorners(gray, (length, width), None)  # Поиск углов
+        if ret:  # Если есть углы
+            objpoints.append(objp)  # Добавление в массив
+            corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)  # Уточнение координат углов
+            imgpoints.append(corners2)  # Добавление в массив
+    if objpoints == [] or imgpoints == []:  # Если нет углов, информируем, выходим
         print("Error: Chessboard not found")
         quit()
 
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None,
-                                                       None, None, None, cv2.CALIB_RATIONAL_MODEL)
-    __yaml_dump(mtx, dist, rvecs, tvecs, gray.shape)
+                                                       None, None, None,
+                                                       cv2.CALIB_RATIONAL_MODEL)  # Получение калибровочных параметров
+    __yaml_save(mtx, dist, rvecs, tvecs, gray.shape)  # Запись в файл
     print("Calibration successful")
     quit()
 
 
-def get_undistorted_image(cv2_image, camera_info):
+def get_undistorted_image(cv2_image, camera_info):  # Исправление изображения
+    # Если используется параметры стандартной камеры
     if camera_info == CLEVER_FISHEYE_CAM_320 or camera_info == CLEVER_FISHEYE_CAM_640:
         file = camera_info
     else:
         file = yaml.load(open(camera_info))
+    # Чтение из файла
     mtx = file['camera_matrix']["data"]
     matrix = np.array([[mtx[0], mtx[1], mtx[2]], [mtx[3], mtx[4], mtx[5]], [mtx[6], mtx[7], mtx[8]]])
     distortions = np.array(file['distortion_coefficients']["data"])
     h, w = cv2_image.shape[:2]
+    # Получение исправленной матрицы
     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(matrix, distortions, (w, h), 1, (w, h))
-    dst = cv2.undistort(cv2_image, matrix, distortions, None, newcameramtx)
+    dst = cv2.undistort(cv2_image, matrix, distortions, None, newcameramtx)  # Исправление изображение
     x, y, w, h = roi
     dst = dst[y:y + h, x:x + w]
     height_or, width_or, depth_or = cv2_image.shape
     height_un, width_un, depth_un = dst.shape
+    # Возвращение к исходному размеру
     frame = cv2.resize(dst, (0, 0), fx=(width_or / width_un), fy=(height_or / height_un))
     return frame
 
 
-def calibrate(chessboard_size, square_size, saving_mode=False):
+def calibrate(chessboard_size, square_size, saving_mode=False):  # real-time калибовка
     print("Calibration started!")
+    # Инициализация переменных
     length, width = chessboard_size
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, square_size, 0.001)
     objp = np.zeros((length * width, 3), np.float32)
@@ -91,20 +101,21 @@ def calibrate(chessboard_size, square_size, saving_mode=False):
     i = 0
     print("Commands:")
     print("help, catch (key: Enter), delete, restart, stop, finish")
-    while True:
+    while True:  # Вход в основной цикл
         command = raw_input()
         if command == "catch" or command == "":
             print("---")
+            # Получение фотографии из потока и ее преобразование
             request = urllib2.Request('http://192.168.11.1:8080/snapshot?topic=/main_camera/image_raw')
             arr = np.asarray(bytearray(urllib2.urlopen(request).read()), dtype=np.uint8)
             image = cv2.imdecode(arr, -1)
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            ret, corners = cv2.findChessboardCorners(gray, (width, length), None)
+            ret, corners = cv2.findChessboardCorners(gray, (width, length), None)  # Поиск углов
             if ret:
-                objpoints.append(objp)
-                corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+                objpoints.append(objp)  # Добавление в массив
+                corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)  # Уточнение координат углов
                 gray_old = gray
-                imgpoints.append(corners2)
+                imgpoints.append(corners2)  # Добавление в массив
                 if saving_mode:
                     cv2.imwrite("photo" + str(i) + ".jpg", gray)
                     i += 1
@@ -130,9 +141,11 @@ def calibrate(chessboard_size, square_size, saving_mode=False):
                 break
             elif command == "finish":
                 if len(objpoints) >= 25:
+                    # Вычисление матриц коэффициентов
                     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray_old.shape[::-1], None,
                                                                        None, None, None, cv2.CALIB_RATIONAL_MODEL)
-                    __yaml_dump(mtx, dist, rvecs, tvecs, gray_old.shape)
+                    # Запись в файл
+                    __yaml_save(mtx, dist, rvecs, tvecs, gray_old.shape)
                     print("Calibration successful")
                     quit()
                 else:
@@ -159,10 +172,9 @@ def calibrate(chessboard_size, square_size, saving_mode=False):
                 print("Unknown command")
         else:
             print("Unknown command")
-    cv2.destroyAllWindows()
 
 
-def __yaml_dump(mtx, dist, rvecs, tvecs, resolution):
+def __yaml_save(mtx, dist, rvecs, tvecs, resolution):  # Функция записи в файл
     h, w, = resolution
     pmatrix = __compute_proj_mat(mtx, rvecs, tvecs)
     rm_data = [1, 0, 0, 0, 1, 0, 0, 0, 1]
@@ -193,7 +205,8 @@ def __yaml_dump(mtx, dist, rvecs, tvecs, resolution):
         else:
             file.write(yaml.dump({key: data[key]}, default_flow_style=False))
 
-def __compute_proj_mat(mtx, rvecs, tvecs):
+
+def __compute_proj_mat(mtx, rvecs, tvecs):  # Вычисление проекционной матрицы
     cam_mtx = np.zeros((3, 4), np.float64)
     cam_mtx[:, :-1] = mtx
     rmat = np.zeros((3, 3), np.float64)
@@ -202,7 +215,8 @@ def __compute_proj_mat(mtx, rvecs, tvecs):
     r_t_mat = cv2.hconcat([rmat, tvecs[0]], r_t_mat)
     return (cam_mtx * r_t_mat)
 
-def __calibrate_command():
+
+def __calibrate_command():  # Точка входа calibrate_cam
     ch_width = int(raw_input("Chessboard width: "))
     ch_height = int(raw_input("Chessboard height: "))
     sq_size = int(raw_input("Square size: "))
@@ -211,12 +225,10 @@ def __calibrate_command():
     calibrate((ch_width, ch_height), sq_size, s_mod == "YES")
 
 
-def __calibrate_ex_command():
+def __calibrate_ex_command():  # Точка входа calibrate_cam_ex
     ch_width = int(raw_input("Chessboard width: "))
     ch_height = int(raw_input("Chessboard height: "))
     sq_size = int(raw_input("Square size: "))
     path = raw_input("Path: ")
     print("---")
     set_camera_info((ch_width, ch_height), sq_size, path)
-
-

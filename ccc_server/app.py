@@ -62,7 +62,7 @@ def finish():
 
 @app.route("/preview")
 def preview():
-    frame, found = cam_calib.get_preview()
+    frame = cam_calib.get_preview()
     return Response(b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n',
                     mimetype='multipart/x-mixed-replace; boundary=frame')

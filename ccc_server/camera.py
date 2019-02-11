@@ -51,7 +51,7 @@ class CalibrationCamera(object):
         cv2.drawChessboardCorners(img, (self.width, self.length), self.corners, ret)
         img = cv2.resize(img, (0, 0), fx=coef_x, fy=coef_y)
         ret, jpg = cv2.imencode('.jpg', img)
-        return jpg.tobytes(), True
+        return jpg.tobytes()
 
     def chessboard(self):
         img = self.get_raw()
@@ -72,7 +72,7 @@ class CalibrationCamera(object):
             ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(self.objpoints, self.imgpoints,
                                                                self.processing_image.shape[::-1], None,
                                                                None, None, None, cv2.CALIB_RATIONAL_MODEL)
-            name = self.__yaml_dump(mtx, dist, rvecs, tvecs, self.processing_image.shape)
+            name = self.__yaml_save(mtx, dist, rvecs, tvecs, self.processing_image.shape)
             return True, self.reproj_error(rvecs, tvecs, mtx, dist), name
         else:
             return False, 0, ""
@@ -83,7 +83,7 @@ class CalibrationCamera(object):
         else:
             return len(self.objpoints)
 
-    def __yaml_dump(self, mtx, dist, rvecs, tvecs, resolution):
+    def __yaml_save(self, mtx, dist, rvecs, tvecs, resolution):
         h, w, = tuple(map(int, resolution))
         pmatrix = self.__compute_proj_mat(mtx, rvecs, tvecs)
         rm_data = [1, 0, 0, 0, 1, 0, 0, 0, 1]
