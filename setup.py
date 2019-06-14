@@ -6,5 +6,5 @@ setup(
     version='1.0',
     packages=["ccc_server, ccc_script"],
     entry_points={
-        'console_scripts': ['runserver = ccc_server.app', "calibrate_cam = ccc_script.calibration:__calibrate_command",
+        'console_scripts': ['run_ccc_page = ccc_server.app', "calibrate_cam = ccc_script.calibration:__calibrate_command",
                             "calibrate_cam = ccc_script.calibration:__calibrate_ex_command"]})
