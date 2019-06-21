@@ -1,3 +1,3 @@
 PORT = 8081
-DEBUG = True
+DEBUG = False
 SAVING_PATH = ""
