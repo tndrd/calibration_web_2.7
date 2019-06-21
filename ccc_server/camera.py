@@ -3,7 +3,7 @@ import numpy as np
 import urllib2
 import yaml
 from config import SAVING_PATH
-
+import time
 
 class CalibrationCamera(object):
     def __init__(self):
@@ -32,8 +32,14 @@ class CalibrationCamera(object):
 
     def get_raw(self):
         request = urllib2.Request('http://192.168.11.1:8080/snapshot?topic=/main_camera/image_raw')
-        arr = np.asarray(bytearray(urllib2.urlopen(request).read()), dtype=np.uint8)
-        raw = cv2.imdecode(arr, -1)
+        raw = []
+        try:
+            arr = np.asarray(bytearray(urllib2.urlopen(request).read()), dtype=np.uint8)
+        except:
+            time.sleep(0.5)
+            raw = self.get_raw()
+        else:
+            raw = cv2.imdecode(arr, -1)
         return raw
 
     def get_frame(self):
