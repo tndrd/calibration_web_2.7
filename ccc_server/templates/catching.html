@@ -55,7 +55,7 @@
         request.send(null);
         if (request.status === 200) {
             photos_left -= 1;
-            var request2 = new XMLHttpRequest();    
+            var request2 = new XMLHttpRequest();
             request2.open('GET', '/preview', false);
             request2.send(null);
             if (request2.status === 500) {
