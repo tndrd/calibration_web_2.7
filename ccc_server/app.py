@@ -45,6 +45,9 @@ def check_page():
     else:
         return calibrate_page("not_found")
 
+@app.route('/check_corners')
+def check_corners():
+    return cam_calib.exists()
 
 @app.route('/add')
 def add():
