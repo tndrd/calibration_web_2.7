@@ -1,45 +1,93 @@
+html {
+    height: 100%;
+}
+
 body {
-  padding-top: 40px;
-  padding-bottom: 40px;
-  background-color: #eee;
+    width: 100%;
+    height: 100%;
+    background: #FFEFBA; /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #FFFFFF, #FFEFBA); /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #FFFFFF, #FFEFBA);
 }
 
 .init-form {
-  max-width: 330px;
-  padding: 15px;
-  margin: 0 auto;
+    padding: 15px;
+    margin: 0;
 }
-.init-form .init-form-heading,
-{
-  margin-bottom: 10px;
+
+.init-form .init-form-heading {
+    margin-bottom: 10px;
+}
+
+.imgushka {
+    width: 500px;
 }
 
 .init-form .field {
-  position: relative;
-  height: auto;
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px;
+    position: relative;
+    height: auto;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 16px;
 }
+
 .init-form .field:focus {
-  z-index: 2;
+    z-index: 2;
 }
+
+.init-form input {
+    width: 100%;
+    padding: 4px;
+}
+
 .init-form input[type="width"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
 }
+
 .init-form input[type="width"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
+
 .init-form input[type="size"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.containerrr {
+    display: table;
+    height: 100%;
+    position: absolute;
+    overflow: hidden;
+    width: 100%;
+}
+
+.helper {
+    #position: absolute;
+    #top: 50%;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+
+.containerr {
+    margin: 0 auto;
+    #position: relative;
+    #top: -50%;
+    padding-right: 10px;
+    padding-left: 10px;
+    background-color: #ffffff;
+    width: fit-content;
+    border-radius: 10px;
+    -webkit-box-shadow: 0px 9px 25px -4px rgba(0, 0, 0, 0.48);
+    -moz-box-shadow: 0px 9px 25px -4px rgba(0, 0, 0, 0.48);
+    box-shadow: 0px 9px 25px -4px rgba(0, 0, 0, 0.48);
 }
