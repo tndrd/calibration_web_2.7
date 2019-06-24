@@ -5,14 +5,15 @@
     <title>Calibration</title>
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
-</head>     
+</head>
 <body>
 
 <
 <div class="containerrr">
     <div class="helper">
         <div class="containerr" style="padding: 20px; padding-bottom: 10px;">
-            <p><a href="/check_page"><img alt="" class="imgushka" id="im" src="http://192.168.11.1:8080/stream?topic=/main_camera/image_raw"></a></p>
+            <p><img alt="" class="imgushka" id="im"
+                                          src="http://192.168.11.1:8080/stream?topic=/main_camera/image_raw"></p>
 
             {% if amount_left < 25 %}
                 <p class="lead">Photos left: <strong>{{ amount_left+1}}</strong></p>
@@ -20,17 +21,17 @@
                 <p class="lead">Photos now: <strong>{{ amount_left }}</strong></p>
             {% endif %}
             <p>
-                <button onclick="add()" class="btn btn-lg btn-primary">Catch photo</button>
+                <button onclick="catching()" id="butt" class="btn btn-lg btn-primary">Catch photo</button>
                 {% if amount_left>24 %}
-                    <a href="/finish" id="butt" class="btn btn-lg btn-success">Finish calibration</a>
+                    <button class="btn btn-lg btn-success">Finish calibration</button>
                 {% endif %}
-                <a href="/" class="btn btn-lg btn-danger">Exit</a>
+                <button id="butt2" class="btn btn-lg btn-danger">Exit</button>
             </p>
         </div>
     </div>
 </div>
 <script>
-    function add() {
+    function catching() {
         //href="/check_page"
         var request = new XMLHttpRequest();
         request.open('GET', '/check_page', false);
@@ -38,7 +39,35 @@
         if (request.status === 200) {
             document.getElementById('im').src = "/preview";
             document.getElementById('butt').innerHTML = "Add";
+            document.getElementById('butt2').innerHTML = "Skip";
+            document.getElementById('butt2').onclick = skip;
+            document.getElementById('butt').onclick = add;
+
         }
+    }
+
+    function add() {
+        var request = new XMLHttpRequest();
+        request.open('GET', '/add', false);
+        request.send(null);
+        if (request.status === 200) {
+            document.getElementById('im').src = "http://192.168.11.1:8080/stream?topic=/main_camera/image_raw";
+            document.getElementById('butt').innerHTML = "Catch photo";
+            document.getElementById('butt2').innerHTML = "Exit";
+            document.getElementById('butt2').onclick = exit;
+            document.getElementById('butt').onclick = catching;
+        }
+    }
+
+    function exit() {
+        window.location = "/finish";
+    }
+
+    function skip() {
+        document.getElementById('im').src = "http://192.168.11.1:8080/stream?topic=/main_camera/image_raw";
+        document.getElementById('butt').innerHTML = "Catch photo";
+        document.getElementById('butt2').innerHTML = "Exit";
+        document.getElementById('butt').onclick = catching;
     }
 </script>
 </body>
