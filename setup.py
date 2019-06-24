@@ -2,7 +2,7 @@ from setuptools import setup
 from os.path import join, dirname
 
 setup(
-    name='ccc_server',
+    name='clever_cam_calibration',
     version='1.0',
     py_modules=['clever_cam_calibration'],
     entry_points={

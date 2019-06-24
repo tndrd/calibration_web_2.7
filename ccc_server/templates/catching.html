@@ -5,18 +5,10 @@
     <title>Calibration</title>
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
-</head>
+</head>     
 <body>
 
-<!--{% if info =="not_found" %}
-    <div class="alert alert-warning"><strong>Chessboard not found.</strong></div>
-{% elif info =="added" %}
-    <div class="alert alert-success"><strong>Photo added!</strong></div>
-{% elif info =="new" %}
-    <div class="alert alert-info"><strong>Calibration started!</strong></div>
-{% elif info =="not_enough" %}
-    <div class="alert alert-warning"><strong>Not enough pictures!</strong></div>
-{% endif %}-->
+<
 <div class="containerrr">
     <div class="helper">
         <div class="containerr" style="padding: 20px; padding-bottom: 10px;">
@@ -27,8 +19,6 @@
             {% else %}
                 <p class="lead">Photos now: <strong>{{ amount_left }}</strong></p>
             {% endif %}
-
-
             <p>
                 <button onclick="add()" class="btn btn-lg btn-primary">Catch photo</button>
                 {% if amount_left>24 %}
