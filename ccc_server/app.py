@@ -1,6 +1,7 @@
 from flask import Flask, Response, render_template, redirect
 from camera import CalibrationCamera
 from flask_wtf import FlaskForm
+import json
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 from config import PORT, DEBUG
@@ -54,11 +55,10 @@ def add():
 @app.route('/finish')
 def finish():
     ret, error, name = cam_calib.finish()
-    if ret:
-        return final_page(error, name)
-    else:
-        return calibrate_page("error")
-
+    data = {"ret" : ret,
+            "error" : error,
+            "name" : name}
+    return json.dumps(data)
 
 @app.route("/preview")
 def preview():
