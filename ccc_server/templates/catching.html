@@ -5,32 +5,29 @@
     <title>Calibration</title>
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/animation.css') }}" rel="stylesheet">
 </head>
 <body>
-
-<
 <div class="containerrr">
     <div class="helper">
-        <div class="containerr" style="padding: 20px; padding-bottom: 10px;">
+        <div class="containerr" id="cont" style="padding: 20px; padding-bottom: 10px;">
             <p><img alt="" class="imgushka" id="im"
-                                          src="http://192.168.11.1:8080/stream?topic=/main_camera/image_raw"></p>
+                    src="http://192.168.11.1:8080/stream?topic=/main_camera/image_raw"></p>
 
-            {% if amount_left < 25 %}
-                <p class="lead">Photos left: <strong>{{ amount_left+1}}</strong></p>
-            {% else %}
-                <p class="lead">Photos now: <strong>{{ amount_left }}</strong></p>
-            {% endif %}
+            <p class="lead">Photos now: <strong id="photos_left">25</strong></p>
             <p>
                 <button onclick="catching()" id="butt" class="btn btn-lg btn-primary">Catch photo</button>
                 {% if amount_left>24 %}
                     <button class="btn btn-lg btn-success">Finish calibration</button>
                 {% endif %}
-                <button id="butt2" class="btn btn-lg btn-danger">Exit</button>
+                <button id="butt2" onclick="exit()" class="btn btn-lg btn-danger">Exit</button>
             </p>
         </div>
     </div>
 </div>
 <script>
+    var photos_left = 25;
+
     function catching() {
         //href="/check_page"
         var request = new XMLHttpRequest();
@@ -51,16 +48,29 @@
         request.open('GET', '/add', false);
         request.send(null);
         if (request.status === 200) {
+            photos_left -= 1;
+            document.getElementById('photos_left').innerHTML = photos_left.toString();
             document.getElementById('im').src = "http://192.168.11.1:8080/stream?topic=/main_camera/image_raw";
             document.getElementById('butt').innerHTML = "Catch photo";
             document.getElementById('butt2').innerHTML = "Exit";
             document.getElementById('butt2').onclick = exit;
             document.getElementById('butt').onclick = catching;
         }
+        if (photos_left === 0) {
+            exit();
+        }
     }
 
     function exit() {
-        window.location = "/finish";
+        //window.location = "/finish";
+        var request = new XMLHttpRequest();
+        document.getElementById('cont').innerHTML = "<div class='spinner'></div>";
+        request.open('GET', '/finish', true);
+        request.send(null);
+        if (request.status === 200) {
+            document.getElementById('cont').innerHTML = "Calibration Finished";
+            console.log(request.responseText);
+        }
     }
 
     function skip() {
