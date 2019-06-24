@@ -34,12 +34,18 @@
         request.open('GET', '/check_page', false);
         request.send(null);
         if (request.status === 200) {
-            document.getElementById('im').src = "/preview";
             document.getElementById('butt').innerHTML = "Add";
             document.getElementById('butt2').innerHTML = "Skip";
             document.getElementById('butt2').onclick = skip;
             document.getElementById('butt').onclick = add;
-
+            var request2 = new XMLHttpRequest();
+            request2.open('GET', '/preview', false);
+            request2.send(null);
+            if (request2.status === 500) {
+                document.getElementById('im').src = "/static/bad.jpg";
+            } else {
+                document.getElementById('im').src = "/preview";
+            }
         }
     }
 
@@ -49,6 +55,12 @@
         request.send(null);
         if (request.status === 200) {
             photos_left -= 1;
+            var request2 = new XMLHttpRequest();    
+            request2.open('GET', '/preview', false);
+            request2.send(null);
+            if (request2.status === 500) {
+                photos_left += 1
+            }
             document.getElementById('photos_left').innerHTML = photos_left.toString();
             document.getElementById('im').src = "http://192.168.11.1:8080/stream?topic=/main_camera/image_raw";
             document.getElementById('butt').innerHTML = "Catch photo";
@@ -69,7 +81,7 @@
             request.open('GET', '/finish', false);
             request.send(null);
             if (request.status === 200) {
-                document.getElementById('cont').innerHTML = "Calibration Finished";
+                document.getElementById('cont').innerHTML = "<h1>Calibration Finished</h1>";
                 console.log(request.responseText);
             }
         }, 200);
@@ -79,6 +91,7 @@
         document.getElementById('im').src = "http://192.168.11.1:8080/stream?topic=/main_camera/image_raw";
         document.getElementById('butt').innerHTML = "Catch photo";
         document.getElementById('butt2').innerHTML = "Exit";
+        document.getElementById('butt2').onclick = exit;
         document.getElementById('butt').onclick = catching;
     }
 </script>

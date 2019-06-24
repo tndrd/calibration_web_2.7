@@ -6,8 +6,8 @@ body {
     width: 100%;
     height: 100%;
     background: #FFEFBA; /* fallback for old browsers */
-    background: -webkit-linear-gradient(to right, #FFFFFF, #FFEFBA); /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(to right, #FFFFFF, #FFEFBA);
+    background: -webkit-linear-gradient(to right, #FFFFFF, #ffd6b1); /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #FFFFFF, #ffd6b1);
 }
 
 .init-form {
