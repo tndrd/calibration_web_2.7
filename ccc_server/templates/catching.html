@@ -63,14 +63,16 @@
 
     function exit() {
         //window.location = "/finish";
-        var request = new XMLHttpRequest();
         document.getElementById('cont').innerHTML = "<div class='spinner'></div>";
-        request.open('GET', '/finish', true);
-        request.send(null);
-        if (request.status === 200) {
-            document.getElementById('cont').innerHTML = "Calibration Finished";
-            console.log(request.responseText);
-        }
+        setTimeout(function () {
+            var request = new XMLHttpRequest();
+            request.open('GET', '/finish', false);
+            request.send(null);
+            if (request.status === 200) {
+                document.getElementById('cont').innerHTML = "Calibration Finished";
+                console.log(request.responseText);
+            }
+        }, 200);
     }
 
     function skip() {
