@@ -80,12 +80,14 @@ class CalibrationCamera(object):
                                                                 self.processing_image.shape[::-1], None,
                                                                 None, None, None, cv2.CALIB_RATIONAL_MODEL)
             except:
+		print("Calibration failed")
                 return False, 0, ""
             else:
                 name = self.__yaml_save(mtx, dist, rvecs, tvecs, self.processing_image.shape)
                 return True, self.reproj_error(rvecs, tvecs, mtx, dist), name
         else:
-            return False, 0, ""
+            print("Not enough photos")	
+	    return False, 0, ""
 
     def amount_left(self):
         if len(self.objpoints) < 25:
