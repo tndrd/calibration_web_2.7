@@ -75,11 +75,15 @@ class CalibrationCamera(object):
 
     def finish(self):
         if len(self.objpoints) >= 25:
-            ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(self.objpoints, self.imgpoints,
-                                                               self.processing_image.shape[::-1], None,
-                                                               None, None, None, cv2.CALIB_RATIONAL_MODEL)
-            name = self.__yaml_save(mtx, dist, rvecs, tvecs, self.processing_image.shape)
-            return True, self.reproj_error(rvecs, tvecs, mtx, dist), name
+            try:
+                ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(self.objpoints, self.imgpoints,
+                                                                self.processing_image.shape[::-1], None,
+                                                                None, None, None, cv2.CALIB_RATIONAL_MODEL)
+            except:
+                return False, 0, ""
+            else:
+                name = self.__yaml_save(mtx, dist, rvecs, tvecs, self.processing_image.shape)
+                return True, self.reproj_error(rvecs, tvecs, mtx, dist), name
         else:
             return False, 0, ""
 

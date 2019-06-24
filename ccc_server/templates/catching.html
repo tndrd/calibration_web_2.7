@@ -13,8 +13,8 @@
 <div class="alert alert-success"><strong>Photo added!</strong></div>
 {% elif info =="new" %}
 <div class="alert alert-info"><strong>Calibration started!</strong></div>
-{% elif info =="not_enough" %}
-<div class="alert alert-warning"><strong>Not enough pictures!</strong></div>
+{% elif info =="error" %}
+<div class="alert alert-danger"><strong>Fatal: Error in calibration process. Try to calibrate your camera again.</strong></div>
 {% endif %}
 <p><a href = "/check_page"><img src="http://192.168.11.1:8080/stream?topic=/main_camera/image_raw"></a></p>
 

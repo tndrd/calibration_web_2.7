@@ -57,7 +57,7 @@ def finish():
     if ret:
         return final_page(error, name)
     else:
-        return calibrate_page("not_enough")
+        return calibrate_page("error")
 
 
 @app.route("/preview")
