@@ -18,7 +18,7 @@
             <p>
                 <button onclick="catching()" id="butt" class="btn btn-lg btn-primary">Catch photo</button>
                 {% if amount_left>24 %}
-                    <button class="btn btn-lg btn-success">Finish calibration</button>
+                <button class="btn btn-lg btn-success">Finish calibration</button>
                 {% endif %}
                 <button id="butt2" onclick="exit()" class="btn btn-lg btn-danger">Exit</button>
             </p>
@@ -77,8 +77,12 @@
             request.open('GET', '/finish', false);
             request.send(null);
             if (request.status === 200) {
-                if (JSON.parse(request.responseText)['ret']) {
-                    document.getElementById('cont').innerHTML = "<h1 style='margin: 15px; margin-top: 5px;'>Calibration Finished</h1>";
+                var finish_data = JSON.parse(request.responseText)
+                if (finish_data['ret']) {
+                    var str1 = "<h2 style='margin: 15px; margin-top: 5px;'>Calibration Finished</h2>"
+                    var str2 = "<h3 style='margin: 15px; margin-top: 5px;'>File was saved as <strong>"+finish_data['name']+"</strong></h3>"
+                    var str3 = "<h3 style='margin: 15px; margin-top: 5px;'>Re-projection error: <strong>"+finish_data['error']+"</strong></h3>"
+                    document.getElementById('cont').innerHTML = str1+str2+str3;
                 } else {
                     document.getElementById('cont').innerHTML = "<h1 style='margin: 15px; margin-top: 5px;'>Calibration Failed</h1>";
                 }
@@ -93,6 +97,7 @@
         document.getElementById('butt2').onclick = exit;
         document.getElementById('butt').onclick = catching;
     }
+
 </script>
 </body>
 </html>
