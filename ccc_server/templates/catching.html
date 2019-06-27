@@ -14,13 +14,10 @@
             <p><img alt="" class="imgushka" id="im"
                     src="http://192.168.11.1:8080/stream?topic=/main_camera/image_raw"></p>
 
-            <p class="lead">Photos left: <strong id="photos_left">25</strong></p>
+            <p class="lead">Photos <span id="status_text">left</span>: <strong id="photos_left">25</strong></p>
             <p>
                 <button onclick="catching()" id="butt" class="btn btn-lg btn-primary">Catch photo</button>
-                {% if amount_left>24 %}
-                <button class="btn btn-lg btn-success">Finish calibration</button>
-                {% endif %}
-                <button id="butt2" onclick="exit()" class="btn btn-lg btn-danger">Exit</button>
+                <button id="butt2" onclick="restart()" class="btn btn-lg btn-danger">Exit</button>
             </p>
         </div>
     </div>
@@ -36,7 +33,7 @@
         request2.open('GET', '/preview', false);
         request2.send(null);
         if (request2.status === 500) {
-            alert("No Image");
+            alert("Checkerboard not found");
         } else {
             var request = new XMLHttpRequest();
             request.open('GET', '/check_page', false);
@@ -44,8 +41,8 @@
             if (request.status === 200) {
                 document.getElementById('im').src = "/preview";
                 document.getElementById('butt').innerHTML = "Add";
-                document.getElementById('butt2').innerHTML = "Skip";
                 document.getElementById('butt2').onclick = skip;
+                document.getElementById('butt2').innerHTML = "Skip";
                 document.getElementById('butt').onclick = add;
             }
         }
@@ -57,15 +54,26 @@
         request.send(null);
         if (request.status === 200) {
             photos_left -= 1;
-            document.getElementById('photos_left').innerHTML = photos_left.toString();
+            var photos_show = photos_left;
+            if (photos_left < 1){
+            document.getElementById('status_text').innerHTML = "now";
+            photos_show = 25 - photos_left;
+            }
+            document.getElementById('photos_left').innerHTML = photos_show.toString();
             document.getElementById('im').src = "http://192.168.11.1:8080/stream?topic=/main_camera/image_raw";
             document.getElementById('butt').innerHTML = "Catch photo";
-            document.getElementById('butt2').innerHTML = "Exit";
-            document.getElementById('butt2').onclick = exit;
+
+            if (photos_left <= 0){
+                document.getElementById('butt2').onclick = exit;
+                document.getElementById('butt2').innerHTML = "Finish";
+
+                document.getElementById('butt2').class = "btn btn-lg btn-success";}
+            else{
+                document.getElementById('butt2').onclick = restart;
+                document.getElementById('butt2').innerHTML = "Exit";}
+
+
             document.getElementById('butt').onclick = catching;
-        }
-        if (photos_left === 0) {
-            exit();
         }
     }
 
@@ -77,11 +85,11 @@
             request.open('GET', '/finish', false);
             request.send(null);
             if (request.status === 200) {
-                var finish_data = JSON.parse(request.responseText)
+                var finish_data = JSON.parse(request.responseText);
                 if (finish_data['ret']) {
-                    var str1 = "<h2 style='margin: 15px; margin-top: 5px;'>Calibration Finished</h2>"
-                    var str2 = "<h3 style='margin: 15px; margin-top: 5px;'>File was saved as <strong>"+finish_data['name']+"</strong></h3>"
-                    var str3 = "<h3 style='margin: 15px; margin-top: 5px;'>Re-projection error: <strong>"+finish_data['error']+"</strong></h3>"
+                    var str1 = "<h2 style='margin: 15px; margin-top: 5px;'>Calibration Finished</h2>";
+                    var str2 = "<h3 style='margin: 15px; margin-top: 5px;'>File was saved as <strong>"+finish_data['name']+"</strong></h3>";
+                    var str3 = "<h3 style='margin: 15px; margin-top: 5px;'>Re-projection error: <strong>"+finish_data['error']+"</strong></h3>";
                     document.getElementById('cont').innerHTML = str1+str2+str3;
                 } else {
                     document.getElementById('cont').innerHTML = "<h1 style='margin: 15px; margin-top: 5px;'>Calibration Failed</h1>";
@@ -90,11 +98,20 @@
         }, 200);
     }
 
+    function restart() {
+        window.location = "/";
+    }
+
     function skip() {
         document.getElementById('im').src = "http://192.168.11.1:8080/stream?topic=/main_camera/image_raw";
         document.getElementById('butt').innerHTML = "Catch photo";
-        document.getElementById('butt2').innerHTML = "Exit";
-        document.getElementById('butt2').onclick = exit;
+        if (photos_left <= 0){
+            document.getElementById('butt2').onclick = exit;
+            document.getElementById('butt2').innerHTML = "Finish";
+            document.getElementById('butt2').class = "btn btn-lg btn-success";}
+        else{
+            document.getElementById('butt2').onclick = restart;
+            document.getElementById('butt2').innerHTML = "Exit";}
         document.getElementById('butt').onclick = catching;
     }
 
