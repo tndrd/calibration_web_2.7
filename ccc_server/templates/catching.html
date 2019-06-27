@@ -54,18 +54,17 @@
             document.getElementById('photos_left').innerHTML = photos_show.toString();
             document.getElementById('im').src = "http://192.168.11.1:8080/stream?topic=/main_camera/image_raw";
             document.getElementById('butt').innerHTML = "Catch photo";
-
+            document.getElementById('butt').onclick = catching;
             if (photos_left <= 0){
                 document.getElementById('butt2').onclick = exit;
                 document.getElementById('butt2').innerHTML = "Finish";
-
-                document.getElementById('butt2').class = "btn btn-lg btn-success";}
-            else{
+                document.getElementById('butt2').removeClass("btn-danger").addClass("btn-success");
+            } else{
                 document.getElementById('butt2').onclick = restart;
                 document.getElementById('butt2').innerHTML = "Exit";}
 
 
-            document.getElementById('butt').onclick = catching;
+
         }
     }
 
@@ -97,14 +96,14 @@
     function skip() {
         document.getElementById('im').src = "http://192.168.11.1:8080/stream?topic=/main_camera/image_raw";
         document.getElementById('butt').innerHTML = "Catch photo";
+        document.getElementById('butt').onclick = catching;
         if (photos_left <= 0){
             document.getElementById('butt2').onclick = exit;
             document.getElementById('butt2').innerHTML = "Finish";
-            document.getElementById('butt2').class = "btn btn-lg btn-success";}
+            document.getElementById('butt2').removeClass("btn-danger").addClass("btn-success");}
         else{
             document.getElementById('butt2').onclick = restart;
             document.getElementById('butt2').innerHTML = "Exit";}
-        document.getElementById('butt').onclick = catching;
     }
 
 </script>
