@@ -28,25 +28,17 @@
     function catching() {
         //href="/check_page"
         var request2 = new XMLHttpRequest();
-        request2.open('GET', '/check_page', false);
-        request2.send(null);
         request2.open('GET', '/preview', false);
         request2.send(null);
         if (request2.status === 500) {
-            alert("Checkerboard not found");
-        } else {
-            var request = new XMLHttpRequest();
-            request.open('GET', '/check_page', false);
-            request.send(null);
-            if (request.status === 200) {
-                document.getElementById('im').src = "/preview";
-                document.getElementById('butt').innerHTML = "Add";
-                document.getElementById('butt2').onclick = skip;
-                document.getElementById('butt2').innerHTML = "Skip";
-                document.getElementById('butt').onclick = add;
-            }
+            alert("Checkerboard not found");}
+        else {
+            document.getElementById('im').src = "/preview";
+            document.getElementById('butt').innerHTML = "Add";
+            document.getElementById('butt2').onclick = skip;
+            document.getElementById('butt2').innerHTML = "Skip";
+            document.getElementById('butt').onclick = add;}
         }
-    }
 
     function add() {
         var request = new XMLHttpRequest();

@@ -38,13 +38,6 @@ def calibrate_page(info=None):
     return render_template("catching.html", amount_left=cam_calib.amount_left(), info=info)
 
 
-@app.route('/check_page')
-def check_page():
-    if cam_calib.exists():
-        return render_template("checking.html")
-    else:
-        return calibrate_page("not_found")
-
 @app.route('/check_corners')
 def check_corners():
     return cam_calib.exists()
