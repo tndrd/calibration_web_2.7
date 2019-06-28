@@ -1,75 +1,105 @@
 # Калибровка камеры
 
-Компьютерное зрение получает все более широкое распространение. Зачастую, алгоритмы компьютерного зрения работают неточно, получая искаженное изображение с камеры, что особенно характерно для fisheye-камер.  
+Для точной работы систем компьютерного зрения (например, для навигации по ArUco-маркерам) используемая камера должна быть откалибрована.  
 
-![asd](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/img1.jpg?raw=true)
+![distorted](../assets/img1.jpg)
 
 > Изображение "скруглено" ближе к краям.
-Какой-либо алгоритм компьютерного зрения будет воспринимать информацию с этой картинки неправильно. Для устранения подобных искажений камера, получающая изображения, должна быть откалибрована в соответствии со своими особенностями.
+Какой-либо алгоритм компьютерного зрения будет воспринимать информацию с этой картинки неправильно.
 
-## Установка скрипта
+## Установка приложения
 
 Для начала, необходимо установить необходимые библиотеки:
 
-```
+```bash
 pip install numpy  
 pip install opencv-python  
-pip install glob  
 pip install pyyaml  
-pip install urllib.request
+pip install urllib2
+pip install flask, flask-wtf
 ```
 
-Затем скачиваем скрипт из репозитория:
+Затем скачиваем исходный код из репозитория и проводим установку:
 
 ```bash
-git clone https://github.com/tinderad/clever_cam_calibration.git
-```
-
-Переходим в скачанную папку и устанавливаем скрипт:
-
-```bash
-cd clever_cam_calibration
+git clone https://github.com/tinderad/calibration_web_2.7.git
+cd calibration_web_2.7.git
 sudo python setup.py build
 sudo python setup.py install
 ```
 
-Если вы используете Windows, тогда скачайте архив из [репозитория](https://github.com/tinderad/clever_cam_calibration/archive/master.zip), распакуйте его и установите:
-
-```bash
-cd path\to\archive\clever_cam_calibration\
-python setup.py build
-python setup.py install
-```
-
-> path\to\archive - путь до распакованного архива.
 ## Подготовка к калибровке
 
 Вам необходимо подготовить калибровочную мишень. Она представляет собой «шахматную доску». Файл можно взять [отсюда](https://www.oreilly.com/library/view/learning-opencv-3/9781491937983/assets/lcv3_ac01.png).  
-Наклейте распечатанную мишень на любую твердую поверхность. Посчитайте количество пересечений в длину и в ширину доски, измерьте размер клетки (в мм).
+Наклейте распечатанную мишень на любую твердую поверхность. Посчитайте количество пересечений в длину и в ширину доски, измерьте размер клетки (в мм), как указано на изображении.
 
-![asd](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/chessboard.jpg?raw=true)
+![asd](../assets/chessboard.jpg)
 
 Включите Клевер и подключитесь к его Wifi.
 
-> Перейдите на 192.168.11.1:8080 и проверьте, получает ли компьютер изображения из топика image_raw.
+> Перейдите на _192.168.11.1:8080_ и проверьте, получает ли компьютер изображения из топика _image_raw_.
+
 ## Калибровка
 
-Запустите скрипт **_calibrate_cam_**:
+Подключитесь к Клеверу по протоколу SSH (например, при помощи PuTTY).
 
-**Windows:**
+Запустите приложение:
 
- ```bash
->path\to\python\Scripts\calibrate_cam.exe
+```bash
+>cd calibration_web_2.7/ccc_server
+>python app.py
 ```
 
-> path\to\Python - путь до директории Python
-**Linux:**
+Далее вам необходимо на компьютере открыть в браузере страницу по адресу _192.168.11.1:8081_
+
+> Порт можно настроить в файле _ccc_server/config.py_.
+
+На открытой странице необходимо ввести параметры калибровочной мишени: количество перекрестий в длину и ширину, длину ребра квадрата. Для начала калибровки нажмите кнопку  **_Start Calibration_**.
+
+![asd](../assets/cam_calib1)
+
+На следующей странице при помощи кнопки **_Catch photo_** можно делать фотографии калибровочной мишени.
+
+![asd](../assets/cam_calib2)
+
+Если программа нашла на изображении указанную мишень, откроется страница, на которой вам необходимо подтвердить корректность найденных перекрестий.
+
+![asd](../assets/cam_calib3)
+
+Если перекрестия были распознаныы правильно, нажмите на клавишу **_Add photo_**, и перейдите к получению новых фотографий. В противном же случае, ели перекристия были распознаны некорректно, пропустите данную фотографию при помощи клавиши **_Skip_**.
+
+![asd](../assets/cam_calib4)
+
+>В большинстве случаев найденные углы будут подсвечиваться разными цветами, но иногда подсветка будет становиться красной. это происходит в том случае, если углы распознаны, но неточно.
+
+Чтобы откалибровать камеру, вам требуется сделать как минимум 25 фото шахматной доски с различных ракурсов. После преодоления данного порога появится кнопка **_Finish_**, по нажатию на которую начнется генерация калибровочного файла.
+
+![asd](../assets/cam_calib5)
+
+>Это может занять некоторое время.
+
+На открывшейся странице выведется информация о результате калибровки: имя файла и re-projection error.
+>re-projection error - отклонение от стандартной математической модели. Чем эта величина меньше, тем точнее проведена калибровка.
+
+![asd](../assets/calibration.jpg)
+
+Программа обработает все полученные фотографии, и создаст **_.yaml_** файл в нынешней директории. При помощи этого файла можно будет выравнивать искажения на изображениях, полученных с этой камеры.
+
+![asd](../assets/cam_calib6)
+
+> Если вы поменяете разрешение получаемого изображения, вам нужно будет снова калибровать камеру.
+
+## Предыдущая версия
+
+Также вы можете воспользоваться предыдущей версией программы, не имеющей web-интерфейса.
+
+Запустите скрипт **_calibrate_cam_**:
 
 ```bash
 >calibrate_cam
 ```
 
-Задайте параметры доски:
+Задайте параметры мишени:
 
 ```bash
 >calibrate_cam
@@ -80,16 +110,16 @@ Saving mode (YES - on):  # Режим сохранения
 ```
 
 > Режим сохранения: если включен, то все полученные фотографии будут сохраняться в нынешней директории.
+
 Скрипт начнет свою работу:
 
-    ...
-    Calibration started!
-    Commands:
-    help, catch (key: Enter), delete, restart, stop, finish
+```
+Calibration started!
+Commands:
+help, catch (key: Enter), delete, restart, stop, finish
+```
 
 Чтобы откалибровать камеру, вам требуется сделать как минимум 25 фото шахматной доски с различных ракурсов.
-
-![asd](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/calibration.jpg?raw=true)
 
 Чтобы сделать фото, введите команду **_catch_**.
 
@@ -108,6 +138,7 @@ Image added, now 1 (25 required)
 ```
 
 > Вместо того, чтобы каждый раз вводить команду **_catch_**, Вы можете просто нажимать клавишу **_Enter_** (вводить пустую строку).
+
 После того, как будет набрано достаточное количество изображений, введите команду **_finish_**.
 
 ```bash
@@ -118,10 +149,10 @@ Calibration successful!
 
 **Калибровка по существующим изображениям:**
 
-Если же у вас уже есть изображения, то вы можете откалибровать камеру по ним при помощи скрипта **_calibrate_cam_ex_**.
+Если же у вас уже есть изображения, то вы можете откалибровать камеру по ним при помощи скрипта **_calibrate_from_dir_**.
 
 ```bash
->calibrate_cam_ex
+>calibrate_from_dir
 ```
 
 Указываем характеристики мишени, а так же путь до папки с изображениями:
@@ -138,30 +169,31 @@ Path:  # Путь до папки с изображениями
 
 Программа обработает все полученные фотографии, и создаст файл **_camera_info_****_._****_yaml_** в нынешней директории. При помощи этого файла можно будет выравнивать искажения на изображениях, полученных с этой камеры.
 
-> Если вы поменяете разрешение получаемого изображения, вам нужно будет снова калибровать камеру.
 ## Исправление искажений
 
-За получение исправленного изображения отвечает функция **_get_undistorted_image(cv2_image, camera_info)_**:
+За получение исправленного изображения отвечает функция
+**clever_cam_calibration._get_undistorted_image(cv2_image, camera_info)_**:
 
 * **_cv2_image_**: Закодированное в массив cv2 изображение.
 * **_camera_****_­__****_info_**: Путь до файла калибровки.
 
 Функция возвращает массив cv2, в котором закодировано исправленное изображение.
 
-> Если вы используете fisheye-камеру, поставляемую вместе с Клевером, то для обработки изображений разрешением 320x240 или 640x480 вы можете использовать уже существующие параметры калибровки. Для этого в качестве аргумента **_camera_info_** передайте параметры **_clever_cam_calibration.clevercamcalib.CLEVER_FISHEYE_CAM_320_** или **_clever_cam_calibration.clevercamcalib.CLEVER_FISHEYE_CAM_640_** соответственно.
+> Если вы используете fisheye-камеру, поставляемую вместе с Клевером, то для обработки изображений разрешением 320x240 или 640x480 вы можете использовать уже существующие параметры калибровки. Для этого в качестве аргумента **_camera_info_** передайте параметры **_clever_cam_calibration.CLEVER_FISHEYE_CAM_320_** или **_clever_cam_calibration.CLEVER_FISHEYE_CAM_640_** соответственно.
+
 ## Примеры работы
 
 Изначальные изображения:
 
-![asd](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/img1.jpg?raw=true)
+![asd](../assets/img1.jpg)
 
-![asd](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/img2.jpg?raw=true)
+![asd](../assets/img2.jpg)
 
 Иcправленные изображения:
 
-![asd](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/calibresult.jpg?raw=true)
+![asd](../assets/calibresult.jpg)
 
-![asd](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/calibresult1.jpg?raw=true)
+![asd](../assets/calibresult1.jpg)
 
 ## Пример использования
 
@@ -170,7 +202,7 @@ Path:  # Путь до папки с изображениями
 Данная программа получает изображения с камеры Клевера и выводит их на экран в исправленном виде, используя существующий калибровочный файл.
 
 ```python
-import clevercamcalib.clevercamcalib as ccc  
+import clever_cam_calibration as ccc  
 import cv2  
 import urllib.request  
 import numpy as np  
@@ -194,24 +226,24 @@ cv2.destroyAllWindows()
 Подключимся к Raspberry Pi по SFTP:
 
 > Пароль: _**raspberry**_
-![enter image description here](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/wcp1.png?raw=true)
+![img](../assets/wcp1.png)
 
 Нажимаем “Войти”. Переходим в _**/home/pi/catkin_ws/src/clever/clever/camera_info/**_ и копируем туда калибровочный .yaml файл:
 
-![enter image description here](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/wcp2.jpg?raw=true)
+![img](../assets/wcp2.png)
 
 Теперь мы должны выбрать этот файл в конфигурации ArUco. Для этого используется связь по протоколу SSH. В данном примере используется программа PuTTY.
 
 Подключимся к Raspberry Pi по SSH:
 
-![enter image description here](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/pty1.jpg?raw=true)
+![img](../assets/pty1.jpg)
 
 Войдем под логином _**pi**_ и паролем _**raspberry**_, перейдем в директорию _**/home/pi/catkin_ws/src/clever/clever/launch**_ и начнем редактировать конфигурацию _**main_camera.launch**_:
 
-![enter image description here](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/pty2.jpg?raw=true)
+![img](../assets/pty2.jpg)
 
 В строке _**camera node**_ заменим параметр _**camera_info**_ на _**camera_info.yaml**_:
 
-![enter image description here](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/pty3.jpg?raw=true)
+![img](../assets/pty3.jpg)
 
-> Не забудьте изменить разрешение камеры.
+> Не забудьте изменить разрешение камеры в *main_camera.launch*.
