@@ -224,7 +224,7 @@ cv2.destroyAllWindows()
 
 Нажимаем “Войти”. Переходим в _**/home/pi/catkin_ws/src/clever/clever/camera_info/**_ и копируем туда калибровочный .yaml файл:
 
-![img](../assets/wcp2.png)
+![img](../assets/wcp2.jpg)
 
 Теперь мы должны выбрать этот файл в конфигурации ArUco. Для этого используется связь по протоколу SSH. В данном примере используется программа PuTTY.
 
